@@ -63,7 +63,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 3. Database: schema, RLS and locked-quote rule
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 1
 - **Goal:** Write SQL migrations for `clients`, `quotes`, `quote_items`, RLS policies based on
   `auth.uid()`, and database-level enforcement of "accepted quote is locked".
 - **Acceptance criteria:**
