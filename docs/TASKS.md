@@ -75,6 +75,45 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
   - Human action instructions included for applying the migration in Supabase.
 - **Guidelines:** DB-01, DB-02, DB-03, DB-04, DB-05, BIZ-05.
 
+## 3b. Harden schema (cross-user refs, function search_path, quantity type)
+
+- [x] Status: done — Iter: 1
+- **Goal:** Fix the not-yet-applied initial migration so it meets DB-06, DB-07 and DB-08,
+  and align the domain with the updated BIZ-03 (quantity is a positive number with up to
+  2 decimals in both the domain and the database). The migration has **not** been applied
+  to Supabase yet, so edit the existing migration file in place (DB-09).
+- **Acceptance criteria:**
+  - **DB-06 (no cross-user references):**
+    - `quotes` insert/update policies verify `client_id` references a client owned by
+      `auth.uid()` (e.g. `exists (select 1 from public.clients c where c.id = client_id and c.user_id = auth.uid())`).
+    - `quote_items` insert/update policies verify `quote_id` references a quote owned by
+      `auth.uid()` using the same pattern.
+    - Checks are in both `using` and `with check` where applicable so updates cannot move
+      a row to another user's client/quote.
+  - **DB-07 (function search_path):**
+    - Every `create ... function` in the migration includes `set search_path = ''` (or an
+      equivalent explicit setting) and uses schema-qualified names (`public.*`, `auth.*`,
+      `pg_catalog.*`) for every table, function and operator reference inside the body.
+    - This applies to `public.set_updated_at`, `public.prevent_accepted_quote_mutation`
+      and `public.prevent_accepted_quote_items_mutation`.
+  - **DB-08 / BIZ-03 (quantity type matches domain):**
+    - `quote_items.quantity` column type accepts positive values with up to 2 decimals
+      (e.g. `numeric(12, 2)`), with a `check (quantity > 0)` constraint and a
+      scale-matching check so values with more than 2 decimals are rejected at the DB.
+    - Domain (`src/features/quotes/domain/money.ts`) rejects quantities that are not
+      positive or that have more than 2 decimal places, with a new `QuoteTotalsError` code
+      (e.g. `quantity_too_many_decimals`).
+    - Existing domain tests are updated so no test case uses a quantity with more than
+      2 decimals; new tests cover the 2-decimal boundary and the rejection of 3+ decimals.
+  - **DB-09 (edit in place):** The schema change goes into the **existing** migration
+    file (`supabase/migrations/20261125120000_init_schema.sql`); no new migration file is
+    added, and the file still runs cleanly on an empty database.
+  - `npm run lint`, `npm run typecheck`, `npm run test` and `npm run build` all pass.
+- **Guidelines:** DB-06, DB-07, DB-08, DB-09, BIZ-03, ARCH-01, CODE-01, CODE-02, CODE-05,
+  CODE-06, TEST-01, TEST-02, TEST-03, TEST-04.
+- **Files/areas:** `supabase/migrations/20261125120000_init_schema.sql`,
+  `src/features/quotes/domain/money.ts`, `src/features/quotes/domain/money.test.ts`.
+
 ## 4. Auth: Supabase SSR + protected routes
 
 - [ ] Status: pending — Iter: —

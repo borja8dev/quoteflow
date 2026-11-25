@@ -3,11 +3,14 @@
  *
  * All amounts flow through the system as integer cents (BIZ-01).
  * Rounding follows half-up at the cent (BIZ-02).
+ * Quantities are positive numbers with at most two decimal places (BIZ-03);
+ * the database enforces the same shape (see supabase/migrations/).
  *
  * This module is intentionally free of React, Supabase, or Next.js imports.
  */
 
 export const VAT_RATE_PERCENT = 21;
+export const QUANTITY_MAX_DECIMALS = 2;
 
 export type QuoteLineInput = {
   readonly quantity: number;
@@ -30,6 +33,7 @@ export type QuoteTotals = {
 export type QuoteTotalsErrorCode =
   | "quantity_not_finite"
   | "quantity_not_positive"
+  | "quantity_too_many_decimals"
   | "unit_price_not_finite"
   | "unit_price_not_integer"
   | "unit_price_negative";
@@ -66,9 +70,42 @@ export function roundHalfUpToCent(valueInCents: number): number {
 }
 
 /**
+ * Count the number of decimal digits a finite number carries in its shortest
+ * exact string representation. Numbers expressed in exponential form (e.g.
+ * `1e-7`) report their effective number of decimals.
+ *
+ * Returns `0` for integers. This helper is a defensive alternative to naive
+ * multiplication tricks like `n * 100 === Math.round(n * 100)`, which fail on
+ * values such as `0.29` due to binary floating point.
+ */
+export function countDecimals(value: number): number {
+  if (!Number.isFinite(value)) {
+    throw new RangeError("countDecimals requires a finite number");
+  }
+  if (Number.isInteger(value)) {
+    return 0;
+  }
+
+  const text = Math.abs(value).toString();
+  const exponentMatch = /^(\d+)(?:\.(\d+))?e([+-]?\d+)$/i.exec(text);
+  if (exponentMatch) {
+    const fractionDigits = exponentMatch[2]?.length ?? 0;
+    const exponent = Number.parseInt(exponentMatch[3] ?? "0", 10);
+    return Math.max(0, fractionDigits - exponent);
+  }
+
+  const dotIndex = text.indexOf(".");
+  if (dotIndex === -1) {
+    return 0;
+  }
+  return text.length - dotIndex - 1;
+}
+
+/**
  * Compute the line total in integer cents (quantity × unit price).
  *
- * Quantity may be fractional (e.g. hours, kilograms); unit price is already
+ * Quantity may be fractional (e.g. hours, kilograms) but must be a positive
+ * number with at most two decimal places (BIZ-03). The unit price is already
  * expressed in integer cents. The product is rounded half-up at the cent.
  */
 export function computeLineTotalCents(line: QuoteLineInput, lineIndex = 0): number {
@@ -84,6 +121,13 @@ export function computeLineTotalCents(line: QuoteLineInput, lineIndex = 0): numb
       "quantity_not_positive",
       lineIndex,
       "Quantity must be greater than zero",
+    );
+  }
+  if (countDecimals(line.quantity) > QUANTITY_MAX_DECIMALS) {
+    throw new QuoteTotalsError(
+      "quantity_too_many_decimals",
+      lineIndex,
+      `Quantity must have at most ${QUANTITY_MAX_DECIMALS} decimal places`,
     );
   }
   if (!Number.isFinite(line.unitPriceCents)) {

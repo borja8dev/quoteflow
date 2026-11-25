@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  QUANTITY_MAX_DECIMALS,
   QuoteTotalsError,
   VAT_RATE_PERCENT,
   computeLineTotalCents,
   computeQuoteTotals,
+  countDecimals,
   roundHalfUpToCent,
 } from "./money";
 
@@ -39,6 +41,41 @@ describe("roundHalfUpToCent", () => {
   });
 });
 
+describe("countDecimals", () => {
+  it("returns 0 for integers", () => {
+    expect(countDecimals(0)).toBe(0);
+    expect(countDecimals(1)).toBe(0);
+    expect(countDecimals(-42)).toBe(0);
+    expect(countDecimals(1_000_000)).toBe(0);
+  });
+
+  it("counts decimal digits for plain decimal numbers", () => {
+    expect(countDecimals(0.1)).toBe(1);
+    expect(countDecimals(1.5)).toBe(1);
+    expect(countDecimals(0.01)).toBe(2);
+    expect(countDecimals(99.99)).toBe(2);
+    expect(countDecimals(0.333)).toBe(3);
+    expect(countDecimals(1.005)).toBe(3);
+  });
+
+  it("handles negative decimals via absolute value", () => {
+    expect(countDecimals(-1.5)).toBe(1);
+    expect(countDecimals(-0.001)).toBe(3);
+  });
+
+  it("handles exponential notation", () => {
+    // 1e-7 has 7 effective decimal places.
+    expect(countDecimals(1e-7)).toBe(7);
+    // 1.5e-3 == 0.0015 -> 4 decimals
+    expect(countDecimals(1.5e-3)).toBe(4);
+  });
+
+  it("throws for non-finite inputs", () => {
+    expect(() => countDecimals(Number.NaN)).toThrow(RangeError);
+    expect(() => countDecimals(Number.POSITIVE_INFINITY)).toThrow(RangeError);
+  });
+});
+
 describe("computeLineTotalCents", () => {
   it("multiplies integer quantities by integer cents", () => {
     expect(
@@ -58,10 +95,22 @@ describe("computeLineTotalCents", () => {
       computeLineTotalCents({ quantity: 1.5, unitPriceCents: 333 }),
     ).toBe(500);
 
-    // 0.333 × 100 = 33.3 cents -> 33
+    // 0.33 × 100 = 33 cents -> 33
     expect(
-      computeLineTotalCents({ quantity: 0.333, unitPriceCents: 100 }),
+      computeLineTotalCents({ quantity: 0.33, unitPriceCents: 100 }),
     ).toBe(33);
+  });
+
+  it("accepts quantities at the 2-decimal boundary", () => {
+    expect(
+      computeLineTotalCents({ quantity: 0.01, unitPriceCents: 10_000 }),
+    ).toBe(100);
+    expect(
+      computeLineTotalCents({ quantity: 1.5, unitPriceCents: 200 }),
+    ).toBe(300);
+    expect(
+      computeLineTotalCents({ quantity: 99.99, unitPriceCents: 1 }),
+    ).toBe(100);
   });
 
   it("rejects zero or negative quantities", () => {
@@ -71,6 +120,30 @@ describe("computeLineTotalCents", () => {
     expect(() =>
       computeLineTotalCents({ quantity: -1, unitPriceCents: 1000 }),
     ).toThrow(QuoteTotalsError);
+  });
+
+  it("rejects quantities with more than 2 decimal places", () => {
+    try {
+      computeLineTotalCents({ quantity: 0.333, unitPriceCents: 100 });
+      expect.unreachable("expected a QuoteTotalsError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(QuoteTotalsError);
+      const asError = error as QuoteTotalsError;
+      expect(asError.code).toBe("quantity_too_many_decimals");
+    }
+
+    try {
+      computeLineTotalCents({ quantity: 1.005, unitPriceCents: 100 });
+      expect.unreachable("expected a QuoteTotalsError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(QuoteTotalsError);
+      const asError = error as QuoteTotalsError;
+      expect(asError.code).toBe("quantity_too_many_decimals");
+    }
+  });
+
+  it("exposes QUANTITY_MAX_DECIMALS matching BIZ-03", () => {
+    expect(QUANTITY_MAX_DECIMALS).toBe(2);
   });
 
   it("rejects negative unit prices", () => {
@@ -152,9 +225,9 @@ describe("computeQuoteTotals", () => {
   });
 
   it("supports fractional quantities with line-level rounding", () => {
-    // line = round(0.333 × 100) = round(33.3) = 33
+    // line = round(0.33 × 100) = round(33) = 33
     // subtotal = 33, VAT = round(33 × 21 / 100) = round(6.93) = 7
-    const result = computeQuoteTotals([{ quantity: 0.333, unitPriceCents: 100 }]);
+    const result = computeQuoteTotals([{ quantity: 0.33, unitPriceCents: 100 }]);
     expect(result.lines[0]?.lineTotalCents).toBe(33);
     expect(result.subtotalCents).toBe(33);
     expect(result.vatCents).toBe(7);
@@ -175,5 +248,20 @@ describe("computeQuoteTotals", () => {
         { quantity: 0, unitPriceCents: 500 },
       ]),
     ).toThrow(QuoteTotalsError);
+  });
+
+  it("propagates a quantity_too_many_decimals error from an invalid line", () => {
+    try {
+      computeQuoteTotals([
+        { quantity: 1, unitPriceCents: 1000 },
+        { quantity: 0.333, unitPriceCents: 100 },
+      ]);
+      expect.unreachable("expected a QuoteTotalsError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(QuoteTotalsError);
+      const asError = error as QuoteTotalsError;
+      expect(asError.code).toBe("quantity_too_many_decimals");
+      expect(asError.lineIndex).toBe(1);
+    }
   });
 });

@@ -5,6 +5,14 @@
 -- (RLS) policies scoped to the authenticated user, plus triggers that enforce
 -- the "accepted quote is locked" business rule at the database level (BIZ-05 /
 -- DB-05).
+--
+-- RLS policies on quotes and quote_items also enforce that referenced rows
+-- belong to the same user (DB-06): foreign keys alone do not stop a user from
+-- pointing a quote at another user's client, because FK lookups bypass RLS.
+--
+-- All SQL functions pin `search_path` to an empty string and use fully
+-- schema-qualified identifiers (DB-07), so they cannot be hijacked by objects
+-- in a user-controlled schema.
 -- -----------------------------------------------------------------------------
 -- HUMAN ACTION REQUIRED — how to apply this migration
 --
@@ -71,6 +79,11 @@ create policy "clients_delete_own"
 
 -- =============================================================================
 -- Table: quotes
+-- -----------------------------------------------------------------------------
+-- The insert/update policies also check that `client_id` points at a client
+-- owned by the authenticated user (DB-06). The foreign key alone is not enough
+-- because FK lookups bypass RLS: a user could otherwise reference a client row
+-- they are not allowed to see.
 -- =============================================================================
 create table if not exists public.quotes (
   id          uuid        primary key default gen_random_uuid(),
@@ -96,13 +109,37 @@ create policy "quotes_select_own"
 create policy "quotes_insert_own"
   on public.quotes
   for insert
-  with check (auth.uid() = user_id);
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.clients c
+      where c.id = client_id
+        and c.user_id = auth.uid()
+    )
+  );
 
 create policy "quotes_update_own"
   on public.quotes
   for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.clients c
+      where c.id = client_id
+        and c.user_id = auth.uid()
+    )
+  )
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.clients c
+      where c.id = client_id
+        and c.user_id = auth.uid()
+    )
+  );
 
 create policy "quotes_delete_own"
   on public.quotes
@@ -113,20 +150,25 @@ create policy "quotes_delete_own"
 -- Table: quote_items
 -- -----------------------------------------------------------------------------
 -- unit_price_cents is stored as an integer (BIZ-01: money as integer cents,
--- never numeric or money). quantity is a positive integer; fractional
--- quantities are not supported by the product (BIZ-03).
+-- never numeric or money). quantity is a positive number with at most two
+-- decimal places (BIZ-03), modelled as numeric(12, 2); a `check` constraint
+-- enforces the scale explicitly so values such as 0.333 are rejected at the
+-- database level even if a client sends extra precision.
 -- user_id is denormalised onto quote_items so RLS policies can filter directly
--- without joining to quotes.
+-- without joining to quotes. The insert/update policies also require that the
+-- referenced quote belongs to the authenticated user (DB-06).
 -- =============================================================================
 create table if not exists public.quote_items (
-  id                uuid        primary key default gen_random_uuid(),
-  user_id           uuid        not null references auth.users (id) on delete cascade,
-  quote_id          uuid        not null references public.quotes (id) on delete cascade,
-  description       text        not null check (char_length(description) between 1 and 500),
-  quantity          integer     not null check (quantity > 0),
-  unit_price_cents  bigint      not null check (unit_price_cents >= 0),
-  created_at        timestamptz not null default now(),
-  updated_at        timestamptz not null default now()
+  id                uuid           primary key default gen_random_uuid(),
+  user_id           uuid           not null references auth.users (id) on delete cascade,
+  quote_id          uuid           not null references public.quotes (id) on delete cascade,
+  description       text           not null check (char_length(description) between 1 and 500),
+  quantity          numeric(12, 2) not null
+                      check (quantity > 0)
+                      check (quantity = round(quantity, 2)),
+  unit_price_cents  bigint         not null check (unit_price_cents >= 0),
+  created_at        timestamptz    not null default now(),
+  updated_at        timestamptz    not null default now()
 );
 
 create index if not exists quote_items_user_id_idx   on public.quote_items (user_id);
@@ -142,13 +184,37 @@ create policy "quote_items_select_own"
 create policy "quote_items_insert_own"
   on public.quote_items
   for insert
-  with check (auth.uid() = user_id);
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.quotes q
+      where q.id = quote_id
+        and q.user_id = auth.uid()
+    )
+  );
 
 create policy "quote_items_update_own"
   on public.quote_items
   for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.quotes q
+      where q.id = quote_id
+        and q.user_id = auth.uid()
+    )
+  )
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1
+      from public.quotes q
+      where q.id = quote_id
+        and q.user_id = auth.uid()
+    )
+  );
 
 create policy "quote_items_delete_own"
   on public.quote_items
@@ -157,13 +223,17 @@ create policy "quote_items_delete_own"
 
 -- =============================================================================
 -- updated_at maintenance
+-- -----------------------------------------------------------------------------
+-- `set search_path = ''` and the schema-qualified reference to pg_catalog.now()
+-- make the function safe against search_path-based hijacking (DB-07).
 -- =============================================================================
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
-  new.updated_at := now();
+  new.updated_at := pg_catalog.now();
   return new;
 end;
 $$;
@@ -192,11 +262,14 @@ create trigger quote_items_set_updated_at
 -- Status transitions themselves (draft -> sent -> accepted/rejected, etc.)
 -- are validated in the domain layer; the trigger below only enforces the
 -- lock on rows that are already accepted.
+-- Both functions pin an empty search_path and use fully qualified identifiers
+-- (DB-07).
 -- =============================================================================
 
 create or replace function public.prevent_accepted_quote_mutation()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
   if tg_op = 'DELETE' then
@@ -232,6 +305,7 @@ create trigger quotes_prevent_delete_when_accepted
 create or replace function public.prevent_accepted_quote_items_mutation()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 declare
   parent_status text;
