@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { LogoutButton } from "@/features/auth/components/logout-button";
 
 export default function HomePage() {
@@ -12,6 +14,15 @@ export default function HomePage() {
         </div>
         <LogoutButton />
       </header>
+      <nav className="flex flex-col gap-2">
+        <Link
+          href="/clients"
+          className="inline-flex items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition-colors hover:bg-gray-50"
+        >
+          <span>Clients</span>
+          <span aria-hidden="true">&rarr;</span>
+        </Link>
+      </nav>
     </main>
   );
 }

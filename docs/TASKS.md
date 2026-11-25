@@ -127,7 +127,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 5. Clients CRUD
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 2
 - **Goal:** Create / list / edit / delete clients, scoped by user via RLS.
 - **Acceptance criteria:**
   - Server Actions under `src/features/clients/actions.ts` with Zod validation.
