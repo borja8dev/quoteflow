@@ -178,7 +178,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 7. Dashboard
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 1
 - **Goal:** Dashboard showing quote count per status and total accepted amount.
 - **Acceptance criteria:**
   - Data fetched server-side, scoped to the authenticated user.

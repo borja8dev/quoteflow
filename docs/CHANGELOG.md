@@ -12,6 +12,18 @@ The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT
 - `ARCH-06`: database errors are logged server-side before being mapped to a generic message;
   `CODE-04` allows `console.error` only for this.
 
+## Task 7 — Dashboard · review rounds: 1
+
+### Added
+- Dashboard at `/` showing quote count per status (Draft, Sent, Accepted, Rejected) and
+  the total accepted amount, with loading, empty and error states. Mobile layout uses a
+  2-up grid at 375px and expands to 4-up on wider screens; the accepted total spans the
+  full row (UI-04, UI-05).
+- `src/features/dashboard/data/stats.ts` fetches the stats server-side, scoped to the
+  authenticated user, and sums accepted totals through `computeQuoteTotals`
+  (ARCH-02, ARCH-05, SEC-06, BIZ-02).
+- `src/app/loading.tsx` skeleton matching the clients/quotes pattern (UI-02).
+
 ## Task 6b — Grant table privileges + DB error logging · review rounds: 1
 
 ### Fixed
