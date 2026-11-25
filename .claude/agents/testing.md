@@ -31,9 +31,11 @@ The task (goal, acceptance criteria, guideline IDs) and Develop's report with th
    npm run typecheck
    npm run test
    npm run build
+   npm audit --omit=dev --audit-level=high
+   npm view next version   # compare with package.json (DEP-01)
    ```
-4. Check every guideline that applies to the task, **plus the global ones** (all `SEC-*` and
-   `CODE-*` always apply). Use Grep for mechanical checks, for example:
+4. Check every guideline that applies to the task, **plus the global ones** (all `SEC-*`,
+   `CODE-*` and `DEP-*` always apply). Use Grep for mechanical checks, for example:
    - secrets: `rg -n "eyJ|sk_|service_role|SUPABASE_SERVICE" --glob '!*.md' --glob '!.env.example'`
    - leftovers: `rg -n "console\.log|: any\b|@ts-ignore" src`
 5. Check the task's acceptance criteria one by one.
@@ -48,6 +50,8 @@ Checks:
 - typecheck: pass/fail
 - test: pass/fail (N tests)
 - build: pass/fail
+- audit (high/critical): 0 / N found
+- dependencies up to date: yes/no
 Acceptance criteria: <met | list of unmet ones>
 
 Failures:            # empty when PASS

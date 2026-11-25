@@ -62,6 +62,9 @@ supabase/migrations/          # Versioned SQL: YYYYMMDDHHMMSS_description.sql
 
 ## Scaffolding note
 
+Always use `npx create-next-app@latest` and `npm install <pkg>@latest`. Never write dependency
+versions from memory: they are outdated and may carry known vulnerabilities (DEP-01..03).
+
 `create-next-app` may refuse to run in a folder that already contains `CLAUDE.md` and `.claude/`.
 If so, scaffold into a temporary folder and move the generated files in, without overwriting
 `CLAUDE.md`, `.claude/` or `docs/`.
@@ -75,6 +78,7 @@ npm run lint
 npm run typecheck
 npm run test
 npm run build
+npm audit --omit=dev --audit-level=high
 ```
 
 ## Output format (always)
@@ -89,6 +93,7 @@ Commands run:
 - npm run typecheck → pass/fail
 - npm run test → pass/fail (N tests)
 - npm run build → pass/fail
+- npm audit (high/critical) → 0 / N
 Guidelines addressed: <IDs>
 Human action needed: <none | exact steps, e.g. run migration X in Supabase SQL editor>
 ```

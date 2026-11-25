@@ -4,7 +4,7 @@ These are the rules **Develop must meet** and **Testing enforces**. Every rule h
 every Testing failure must cite one. If a rule is ambiguous, the Orchestrator asks the human —
 nobody reinterprets it alone.
 
-`SEC-*` and `CODE-*` apply to **every** task. The other groups apply when the task touches that area.
+`SEC-*`, `CODE-*` and `DEP-*` apply to **every** task. The other groups apply when the task touches that area.
 
 ## SEC — Security
 
@@ -15,9 +15,20 @@ nobody reinterprets it alone.
 - **SEC-04** Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` may be exposed
   to the browser.
 - **SEC-05** Every route under the protected area redirects unauthenticated users to `/login`
-  (enforced in middleware).
+  (enforced in Next.js middleware/proxy, whichever the installed Next.js version uses).
 - **SEC-06** Every Server Action checks the authenticated user before reading or writing data.
 - **SEC-07** All user input is validated server-side with Zod before it reaches the database.
+- **SEC-08** `npm audit --omit=dev --audit-level=high` reports zero high or critical
+  vulnerabilities.
+
+## DEP — Dependencies
+
+- **DEP-01** `next`, `react`, `react-dom` and `eslint-config-next` are on the latest stable
+  release (check with `npm view <pkg> version`). `eslint-config-next` matches the `next` version.
+- **DEP-02** No release candidates, canaries, betas or previews (`-rc`, `-canary`, `-beta`)
+  in `package.json`.
+- **DEP-03** Versions are resolved by the package manager (`npm install <pkg>@latest`), never
+  typed from memory.
 
 ## CODE — Code quality
 
