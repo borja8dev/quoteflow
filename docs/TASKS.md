@@ -138,7 +138,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 6. Quotes CRUD with items and status changes
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 2
 - **Goal:** Manage quotes and their line items, with status transitions.
 - **Acceptance criteria:**
   - Create/read/update of quotes with items; totals computed via domain from Task 2.

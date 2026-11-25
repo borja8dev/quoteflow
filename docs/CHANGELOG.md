@@ -5,6 +5,23 @@ entry after every Testing `PASS`, in the same commit as the code (so entries wri
 onwards carry no commit hash; use `git log -- docs/CHANGELOG.md` to find it). Format based on [Keep a Changelog](https://keepachangelog.com/).
 The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT_LOG.md).
 
+## Task 6 — Quotes CRUD · review rounds: 2
+
+### Added
+- Quotes list, create, edit, read-only detail and delete under `/quotes`, with loading,
+  empty and error states.
+- Quote form with client selector, dynamic line items, labelled inputs, field-level errors,
+  and a running totals preview computed via the domain.
+- Status transition buttons on the detail page (Send / Accept / Reject / Return to draft),
+  each driven by a Server Action that defers to `transitionQuoteStatus`.
+- Shared euro formatter (`src/features/quotes/domain/format.ts`) for Spanish amount display.
+
+### Fixed (review round 1 → 2)
+- `listQuotes` was recomputing subtotal, VAT and total inline with `Math.round` and a
+  literal `21`, bypassing `computeQuoteTotals` and the half-up rounding rule
+  (BIZ-02, ARCH-01). It now delegates to the domain function.
+- `quote-schema.ts` exported an unused `QUOTE_STATUSES_FOR_FORM` constant (CODE-04); removed.
+
 ## Task 5 — Clients CRUD · `a9b9802` · review rounds: 2
 
 ### Added
