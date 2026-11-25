@@ -1,0 +1,113 @@
+# TASKS — QuoteFlow
+
+Ordered task list for the project. Tick a task only after Testing returns `PASS`.
+Each task names the guideline IDs from `docs/DIRECTRICES.md` that apply; global rules
+(`SEC-*`, `CODE-*`) apply to every task even when not listed.
+
+Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testing rounds ran.
+
+---
+
+## 1. Scaffold the Next.js app
+
+- [x] Status: done — Iter: 1
+- **Goal:** Set up the Next.js (App Router) project with TypeScript strict, Tailwind CSS,
+  ESLint and Vitest so later tasks have a working toolchain.
+- **Acceptance criteria:**
+  - `package.json` exists with scripts `lint`, `typecheck`, `test`, `build`, `dev`, `start`.
+  - TypeScript is configured with `"strict": true`.
+  - Tailwind is wired up (config file + directives in a global stylesheet) and used by the
+    default page.
+  - ESLint is configured and `npm run lint` passes with zero errors on a fresh scaffold.
+  - Vitest is configured and `npm run test` passes with at least one placeholder test.
+  - `npm run typecheck` and `npm run build` pass.
+  - `.env.example` exists at the repo root with empty values for
+    `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+  - `.gitignore` ignores `node_modules`, `.next`, `.env`, `.env*.local`.
+  - No real secrets committed anywhere.
+  - `CLAUDE.md`, `.claude/`, `docs/` are preserved unchanged.
+- **Guidelines:** SEC-01, SEC-02, SEC-04, CODE-01, CODE-02, CODE-03, CODE-04, CODE-05, CODE-06, TEST-01.
+- **Files/areas:** repo root (`package.json`, `tsconfig.json`, `next.config.*`, `tailwind.config.*`,
+  `postcss.config.*`, `.eslintrc*`, `vitest.config.*`, `src/app/**`, `.env.example`, `.gitignore`).
+
+## 2. Domain: pure quote logic + Spanish tax ID validation
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Implement the pure business logic (line totals, subtotal, VAT, total in integer
+  cents), the status-transition rule, and Spanish NIF/NIE/CIF validation, with full unit tests.
+- **Acceptance criteria:**
+  - Modules under `src/features/quotes/domain/` and `src/features/clients/domain/` are pure
+    (no React, no Supabase, no Next.js imports).
+  - Money math uses integer cents, with half-up rounding at the cent.
+  - Status transitions implement only `draft → sent`, `sent → accepted`, `sent → rejected`,
+    `sent → draft`; everything else is rejected.
+  - Tax ID validator covers NIF, NIE and CIF including the control character.
+  - `npm run test` passes; every domain function has unit tests covering happy path and edges
+    (rounding, zero / negative, forbidden transitions, valid and invalid tax IDs).
+- **Guidelines:** ARCH-01, BIZ-01, BIZ-02, BIZ-03, BIZ-04, BIZ-06, TEST-01, TEST-02, TEST-03, TEST-04.
+
+## 3. Database: schema, RLS and locked-quote rule
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Write SQL migrations for `clients`, `quotes`, `quote_items`, RLS policies based on
+  `auth.uid()`, and database-level enforcement of "accepted quote is locked".
+- **Acceptance criteria:**
+  - New file(s) under `supabase/migrations/` with timestamped names.
+  - Each table has `user_id` and RLS enabled, with select/insert/update/delete policies based
+    on `auth.uid() = user_id`.
+  - Foreign keys declared with explicit `on delete` behaviour.
+  - Trigger or policy that prevents update/delete when a quote (or its items) is `accepted`.
+  - Human action instructions included for applying the migration in Supabase.
+- **Guidelines:** DB-01, DB-02, DB-03, DB-04, DB-05, BIZ-05.
+
+## 4. Auth: Supabase SSR + protected routes
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Add Supabase SSR clients, login/logout, and middleware-based route protection.
+- **Acceptance criteria:**
+  - `src/lib/supabase/server.ts`, `client.ts`, `middleware.ts` exist using `@supabase/ssr`.
+  - `/login` page with email/password form.
+  - Logout action.
+  - Middleware redirects unauthenticated users on protected routes to `/login`.
+- **Guidelines:** SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, ARCH-03, ARCH-04, ARCH-05, UI-01, UI-03.
+
+## 5. Clients CRUD
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Create / list / edit / delete clients, scoped by user via RLS.
+- **Acceptance criteria:**
+  - Server Actions under `src/features/clients/actions.ts` with Zod validation.
+  - List page with loading, empty and error states.
+  - Form uses labels, validation errors next to fields, mobile-friendly.
+  - Tax ID and email validated via domain functions from Task 2.
+- **Guidelines:** SEC-06, SEC-07, ARCH-02, ARCH-03, ARCH-04, BIZ-06, BIZ-07, UI-01, UI-02, UI-03, UI-04.
+
+## 6. Quotes CRUD with items and status changes
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Manage quotes and their line items, with status transitions.
+- **Acceptance criteria:**
+  - Create/read/update of quotes with items; totals computed via domain from Task 2.
+  - Status transitions only via Server Actions that call the domain validator.
+  - Accepted quotes show no edit/delete controls.
+- **Guidelines:** ARCH-02, ARCH-03, ARCH-04, BIZ-01, BIZ-02, BIZ-03, BIZ-04, BIZ-05, UI-01, UI-02, UI-03, UI-05, UI-06.
+
+## 7. Dashboard
+
+- [ ] Status: pending — Iter: —
+- **Goal:** Dashboard showing quote count per status and total accepted amount.
+- **Acceptance criteria:**
+  - Data fetched server-side, scoped to the authenticated user.
+  - Amounts formatted in euros (Spanish formatting).
+  - Loading and empty states.
+- **Guidelines:** ARCH-02, ARCH-05, SEC-06, UI-02, UI-04, UI-05.
+
+## 8. Deploy readiness
+
+- [ ] Status: pending — Iter: —
+- **Goal:** The app is ready to deploy on Vercel with a demo user.
+- **Acceptance criteria:**
+  - `npm run build` passes in production mode.
+  - `README.md` explains the app, local setup, env vars, how to run migrations,
+    Vercel deploy steps, and the demo user seed.
+- **Guidelines:** CODE-05, DOC-01, DOC-02.
