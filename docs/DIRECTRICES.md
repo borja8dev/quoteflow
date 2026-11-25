@@ -60,13 +60,23 @@ nobody reinterprets it alone.
   `on delete` behaviour.
 - **DB-05** The rule "an accepted quote cannot be modified or deleted" is enforced in the
   database (trigger or policy), not only in the UI.
+- **DB-06** No cross-user references: insert/update policies verify that referenced rows belong
+  to the same user (`quotes.client_id` → a client of `auth.uid()`, `quote_items.quote_id` → a
+  quote of `auth.uid()`). A foreign key alone does not enforce this, because FK checks bypass RLS.
+- **DB-07** Every SQL function sets an explicit `search_path` (e.g. `set search_path = ''`)
+  and uses schema-qualified names.
+- **DB-08** Column types match the domain: if the domain accepts a value, the database accepts
+  it too, and vice versa.
+- **DB-09** A migration that has not been applied to Supabase yet may be corrected in place;
+  once applied, changes go in a new migration file.
 
 ## BIZ — Business rules
 
 - **BIZ-01** All money amounts are stored and computed as integer cents.
 - **BIZ-02** Line total = quantity × unit price. Subtotal = sum of line totals.
   VAT = round(subtotal × 21 / 100). Total = subtotal + VAT. Rounding is half-up to the cent.
-- **BIZ-03** Quantity is a positive number and unit price is ≥ 0. A quote needs at least one
+- **BIZ-03** Quantity is a positive number with up to 2 decimals (e.g. `1.5` hours) and unit
+  price is ≥ 0. A quote needs at least one
   line item before it can be sent.
 - **BIZ-04** Allowed status transitions: `draft → sent`, `sent → accepted`, `sent → rejected`,
   `sent → draft`. Any other transition is rejected.
