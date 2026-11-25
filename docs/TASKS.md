@@ -186,6 +186,47 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
   - Loading and empty states.
 - **Guidelines:** ARCH-02, ARCH-05, SEC-06, UI-02, UI-04, UI-05.
 
+## 7b. Move dashboard aggregation into the domain (ARCH-01, TEST-02)
+
+- [x] Status: done — Iter: 1
+- **Goal:** Pull the dashboard aggregation (count per status, accepted total) out of
+  `src/features/dashboard/data/stats.ts` into a pure domain function with unit tests. The
+  data layer must only query the database, coerce the raw rows into typed inputs, and
+  delegate the aggregation to the domain. Business rules do not belong in the data layer.
+- **Acceptance criteria:**
+  - **ARCH-01:** a new pure module under `src/features/dashboard/domain/` (e.g. `stats.ts`)
+    exports a function such as `aggregateDashboardStats(quotes)` that takes a typed
+    structure of quote summaries (status + line items with `quantity` and
+    `unitPriceCents` already coerced to numbers) and returns the same
+    `DashboardStats` shape (`countsByStatus`, `acceptedTotalCents`, `quoteCount`). No
+    React, Supabase or Next.js imports; may import from other `domain/` modules
+    (e.g. `computeQuoteTotals`, `QUOTE_STATUSES`, `isQuoteStatus`).
+  - The data layer (`src/features/dashboard/data/stats.ts`) only runs the Supabase query,
+    guards the session (SEC-06), coerces raw numeric/text columns to the domain's input
+    shape, and delegates aggregation to the domain function. The `emptyCounts`,
+    accepted-sum loop and status filtering move out of the data layer entirely.
+  - **TEST-02 / TEST-03:** unit tests (`src/features/dashboard/domain/stats.test.ts`)
+    cover at minimum:
+    - no quotes → zero counts for every status and `acceptedTotalCents === 0`;
+    - mixed statuses → correct per-status counts and `quoteCount` equal to the sum;
+    - accepted-only sum → `acceptedTotalCents` ignores non-accepted quotes entirely;
+    - rounding — at least one case exercising the VAT half-up boundary via
+      `computeQuoteTotals` so the aggregated total is the sum of correctly rounded
+      per-quote totals, not a single round over the whole set;
+    - rows with an unknown status string are discarded (no crash, no count bump).
+  - **TEST-04:** tests are pure — no Supabase, no network, no date dependence.
+  - **Public API:** the data layer's export surface (`getDashboardStats`,
+    `DashboardStats`, `DashboardStatsResult`) and the dashboard page continue to work
+    unchanged. If the `DashboardStats` type needs to move, re-export it from the data
+    module so `src/app/page.tsx` imports do not change.
+  - `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` all pass;
+    `npm audit --omit=dev --audit-level=high` reports 0 vulnerabilities.
+- **Guidelines:** ARCH-01, ARCH-02, ARCH-04, ARCH-05, ARCH-06, SEC-06, TEST-01, TEST-02,
+  TEST-03, TEST-04, CODE-01, CODE-02, CODE-03, CODE-04, CODE-05, CODE-06.
+- **Files/areas:** `src/features/dashboard/domain/stats.ts` (new),
+  `src/features/dashboard/domain/stats.test.ts` (new),
+  `src/features/dashboard/data/stats.ts` (refactored).
+
 ## 8. Deploy readiness
 
 - [ ] Status: pending — Iter: —

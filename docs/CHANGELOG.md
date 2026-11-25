@@ -5,6 +5,22 @@ entry after every Testing `PASS`, in the same commit as the code (so entries wri
 onwards carry no commit hash; use `git log -- docs/CHANGELOG.md` to find it). Format based on [Keep a Changelog](https://keepachangelog.com/).
 The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT_LOG.md).
 
+## Task 7b — Dashboard aggregation in the domain · review rounds: 1
+
+### Changed
+- Moved the dashboard aggregation (count per status, accepted total) out of
+  `src/features/dashboard/data/stats.ts` into a pure
+  `src/features/dashboard/domain/stats.ts`. The data layer now only queries,
+  coerces raw columns and delegates (ARCH-01, ARCH-02). Public API
+  (`getDashboardStats`, `DashboardStats`, `DashboardStatsResult`) and
+  `src/app/page.tsx` are unchanged.
+
+### Added
+- `src/features/dashboard/domain/stats.test.ts` — unit tests covering: no quotes,
+  mixed statuses, accepted-only sum, VAT half-up boundary (per-quote rounding, not a
+  single round over the raw sum), unknown status discarded, accepted-with-zero-lines
+  edge case (TEST-02, TEST-03, TEST-04).
+
 ## Task 7 — Dashboard · review rounds: 1
 
 ### Added
