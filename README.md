@@ -4,6 +4,30 @@
 
 QuoteFlow is a quote manager for small businesses. You keep a list of clients, build quotes with line items (description, quantity, unit price), and move each quote through a status flow (`draft` → `sent` → `accepted` or `rejected`). Totals are computed server-side with VAT at 21 %, and an `accepted` quote is locked: it cannot be edited or deleted.
 
+## How it was built: three Claude Code agents
+
+QuoteFlow was built entirely by a team of three Claude Code agents defined in this repository.
+The human set the rules, reviewed the results and handled external services; the agents wrote
+and reviewed all the code.
+
+| Agent | Definition | Role |
+| --- | --- | --- |
+| Orchestrator | [`CLAUDE.md`](CLAUDE.md) | Plans the work in [`docs/TASKS.md`](docs/TASKS.md), delegates each task, loops until `PASS`, records the changelog and commits. Never writes application code. |
+| Develop | [`.claude/agents/develop.md`](.claude/agents/develop.md) | Implements each task following its coding guide and the guidelines. |
+| Testing | [`.claude/agents/testing.md`](.claude/agents/testing.md) | Read-only reviewer. Runs lint, typecheck, tests, build and `npm audit`, checks every applicable rule in [`docs/DIRECTRICES.md`](docs/DIRECTRICES.md), and returns `PASS` or `FAIL` with a list of failures that Develop must fix. |
+
+```
+Orchestrator → Develop (implement) → Testing (review)
+                    ▲                      │
+                    └──── FAIL: failures ──┘
+                          PASS: changelog + one commit per task
+```
+
+- [`docs/DEVELOPMENT_LOG.md`](docs/DEVELOPMENT_LOG.md): timeline, review rounds per task, real
+  `FAIL` examples, and how the guidelines evolved when human review found gaps.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md): what each task changed, including what Testing
+  caught between review rounds.
+
 ## Tech stack
 
 - Next.js (App Router)
@@ -142,3 +166,4 @@ docs/               Project rules (DIRECTRICES.md), roadmap (TASKS.md), changelo
 
 - [`docs/DIRECTRICES.md`](docs/DIRECTRICES.md) — the rules every contribution must follow. Read this before opening a pull request.
 - [`docs/TASKS.md`](docs/TASKS.md) — current roadmap and task status.
+- [`docs/DEVELOPMENT_LOG.md`](docs/DEVELOPMENT_LOG.md) — how the project was built by the agent team.

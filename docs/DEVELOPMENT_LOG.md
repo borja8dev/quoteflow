@@ -60,6 +60,8 @@ The loop escalates to the human after 5 failed iterations. Steps that touch exte
 | — | Guidelines v1.3 | `0270ddc` | — | Table grants and error logging (see §3.3). |
 | 6b | Grants and error logging | `2c56303` | 1 | New migration with explicit grants; data layer logs DB errors. Verified live in the browser. |
 | 7 | Dashboard | `049b729` | 1 | Quote count per status and total accepted amount. |
+| 7b | Dashboard aggregation in the domain | `6024162` | 1 | Human review: aggregation lived in the data layer without tests (`ARCH-01`). Moved to a pure function with 6 tests. |
+| 8 | Deploy readiness | `7b13aff` | 1 | README with setup, migrations, Vercel deploy and demo user. |
 
 ### 2.1 The review loop in action (task 5)
 
