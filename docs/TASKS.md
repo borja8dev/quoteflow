@@ -30,6 +30,21 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 - **Files/areas:** repo root (`package.json`, `tsconfig.json`, `next.config.*`, `tailwind.config.*`,
   `postcss.config.*`, `.eslintrc*`, `vitest.config.*`, `src/app/**`, `.env.example`, `.gitignore`).
 
+## 1b. Upgrade dependencies
+
+- [x] Status: done — Iter: 1
+- **Goal:** Upgrade `next`, `react`, `react-dom` and `eslint-config-next` to their latest stable
+  versions so the scaffold meets SEC-08 and DEP-01..03.
+- **Acceptance criteria:**
+  - `next`, `react`, `react-dom` and `eslint-config-next` are at the latest stable release
+    (resolved with `npm install <pkg>@latest`, never typed from memory).
+  - `eslint-config-next` version matches the installed `next` version.
+  - No `-rc`, `-canary`, `-beta` or `-preview` suffixes in any of these four packages.
+  - `npm audit --omit=dev --audit-level=high` exits 0 (zero high/critical vulnerabilities).
+  - `npm run lint`, `npm run typecheck`, `npm run test` and `npm run build` all pass after the upgrade.
+- **Guidelines:** SEC-08, DEP-01, DEP-02, DEP-03, CODE-01, CODE-02, CODE-05, TEST-01.
+- **Files/areas:** `package.json`, `package-lock.json`.
+
 ## 2. Domain: pure quote logic + Spanish tax ID validation
 
 - [ ] Status: pending — Iter: —
