@@ -229,7 +229,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 8. Deploy readiness
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 1
 - **Goal:** The app is ready to deploy on Vercel with a demo user.
 - **Acceptance criteria:**
   - `npm run build` passes in production mode.

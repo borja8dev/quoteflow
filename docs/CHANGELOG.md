@@ -5,6 +5,15 @@ entry after every Testing `PASS`, in the same commit as the code (so entries wri
 onwards carry no commit hash; use `git log -- docs/CHANGELOG.md` to find it). Format based on [Keep a Changelog](https://keepachangelog.com/).
 The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT_LOG.md).
 
+## Task 8 — Deploy readiness · review rounds: 1
+
+### Added
+- `README.md` covering what QuoteFlow is, tech stack, local setup, environment variables,
+  how to run the two SQL migrations in order, deploying to Vercel, demo user seed
+  (plus an optional SQL snippet that looks the demo user up in `auth.users` by email),
+  npm scripts, project layout and pointers to the contributor docs (DOC-01).
+- Production build (`npm run build`) verified green (CODE-05).
+
 ## Task 7b — Dashboard aggregation in the domain · review rounds: 1
 
 ### Changed
