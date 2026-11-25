@@ -116,7 +116,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 4. Auth: Supabase SSR + protected routes
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 1
 - **Goal:** Add Supabase SSR clients, login/logout, and middleware-based route protection.
 - **Acceptance criteria:**
   - `src/lib/supabase/server.ts`, `client.ts`, `middleware.ts` exist using `@supabase/ssr`.
