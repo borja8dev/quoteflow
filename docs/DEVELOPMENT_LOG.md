@@ -56,6 +56,8 @@ The loop escalates to the human after 5 failed iterations. Steps that touch exte
 | 3b | Harden schema | `916f4ce` | 1 | Cross-user checks in RLS, pinned `search_path`, `numeric(12,2)` quantity. |
 | 4 | Auth | `3d10f0c` | 1 | Supabase SSR auth, login/logout, route protection with `proxy.ts`. |
 | 5 | Clients CRUD | `a9b9802` | **2** | First `FAIL` from Testing (see §2.1). |
+| 6 | Quotes CRUD | `d8bc2e6` | **2** | Testing caught VAT recomputed outside the domain (`BIZ-02`, `ARCH-01`). |
+| — | Guidelines v1.3 | — | — | Table grants and error logging (see §3.3). |
 
 ### 2.1 The review loop in action (task 5)
 
@@ -71,7 +73,7 @@ both rounds: this was caught by the guideline review, not by the toolchain.
 
 ## 3. Guideline evolution (human review)
 
-Testing approves strictly against the guidelines. Twice, human review found a real problem
+Testing approves strictly against the guidelines. Three times, human review found a real problem
 that Testing approved **because no rule covered it**. In both cases the fix was the same:
 add the missing rule, update the agents, then send a corrective task through the normal loop.
 The guidelines are the contract, so they are what gets improved.
@@ -101,6 +103,21 @@ The guidelines are the contract, so they are what gets improved.
   (database types match the domain), `DB-09` (an unapplied migration may be corrected in place);
   `BIZ-03` clarified (quantity up to 2 decimals).
 - **Result:** task 3b fixed the migration before it ever reached the database.
+
+### 3.3 v1.3 — Table privileges and error visibility (after task 6)
+
+- **Finding:** a manual browser test of `/quotes/new` showed "We could not load your clients"
+  although all automated checks were green. A read-only catalog query
+  (`information_schema.role_table_grants`) showed that `authenticated` had only
+  `REFERENCES, TRIGGER, TRUNCATE` on the three tables: no `SELECT`, `INSERT`, `UPDATE` or
+  `DELETE`. RLS policies were correct, but RLS only filters rows; without a `GRANT` the role
+  cannot access the table. The project's Data API does not grant new tables automatically.
+- **Why it took a manual test to find it:** unit tests do not hit the real database, and the
+  data layer mapped the Supabase error to a generic message without logging it, so the
+  real cause (`42501 permission denied`) was invisible.
+- **Rules added:** `DB-10` (explicit grants to `authenticated`, none to `anon`) and `ARCH-06`
+  (log database errors server-side before mapping them); `CODE-04` updated accordingly.
+- **Result:** corrective task 6b (new migration with grants, error logging in the data layer).
 
 ## 4. Human-in-the-loop steps
 

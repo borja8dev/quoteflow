@@ -36,6 +36,7 @@ nobody reinterprets it alone.
 - **CODE-02** `npm run typecheck` passes; TypeScript `strict` is enabled.
 - **CODE-03** No `any`, no `@ts-ignore`, no `@ts-expect-error` in `src/`.
 - **CODE-04** No `console.log`, no commented-out code, no unused exports in `src/`.
+  Server-side `console.error` is allowed only as required by ARCH-06.
 - **CODE-05** `npm run build` passes.
 - **CODE-06** Names and code are in English and descriptive.
 
@@ -49,6 +50,10 @@ nobody reinterprets it alone.
   and never leak raw database errors to the client.
 - **ARCH-05** Server code uses `lib/supabase/server.ts`; client components use
   `lib/supabase/client.ts` only.
+- **ARCH-06** Database errors are never swallowed silently. Before mapping a Supabase error to a
+  generic user-facing message, the data layer logs it server-side with `console.error`, including
+  the operation name and the error `code` and `message` (no user data, no request payloads).
+  This is the only allowed use of `console.*` in `src/` (see CODE-04).
 
 ## DB — Database
 
@@ -69,6 +74,9 @@ nobody reinterprets it alone.
   it too, and vice versa.
 - **DB-09** A migration that has not been applied to Supabase yet may be corrected in place;
   once applied, changes go in a new migration file.
+- **DB-10** Table privileges are granted explicitly in the migration: `select, insert, update,
+  delete` on every application table to `authenticated`, and nothing to `anon`. RLS only filters
+  rows; without a `GRANT` the role cannot touch the table at all (Postgres error `42501`).
 
 ## BIZ — Business rules
 
