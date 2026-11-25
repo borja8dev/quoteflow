@@ -12,6 +12,23 @@ The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT
 - `ARCH-06`: database errors are logged server-side before being mapped to a generic message;
   `CODE-04` allows `console.error` only for this.
 
+## Task 6b — Grant table privileges + DB error logging · review rounds: 1
+
+### Fixed
+- Signed-in users saw `permission denied for table …` (`42501`) on `/clients` and
+  `/quotes/new` because the initial migration never granted the `authenticated` role any
+  privileges. New migration `supabase/migrations/20261125190000_grant_authenticated.sql`
+  grants `select, insert, update, delete` on `public.clients`, `public.quotes`,
+  `public.quote_items` to `authenticated` and defensively revokes everything from `anon`
+  (DB-10). The migration still needs to be applied to Supabase by the human.
+
+### Added
+- Server-side `console.error` logging in every data-layer function and Server Action that
+  maps a Supabase error to a generic user message, with an operation label plus the error
+  `code` and `message` (ARCH-06). No user-submitted payloads are logged.
+- `eslint.config.mjs` now allows `console.error` (and only `console.error`), matching the
+  v1.3 CODE-04 update.
+
 ## Task 6 — Quotes CRUD · review rounds: 2
 
 ### Added

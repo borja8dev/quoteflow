@@ -83,6 +83,7 @@ export async function createClientAction(
   });
 
   if (error) {
+    console.error("clients.create", { code: error.code, message: error.message });
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -134,6 +135,7 @@ export async function updateClientAction(
     .maybeSingle();
 
   if (error) {
+    console.error("clients.update", { code: error.code, message: error.message });
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -173,6 +175,7 @@ export async function deleteClientAction(
   const { error } = await supabase.from("clients").delete().eq("id", rawId);
 
   if (error) {
+    console.error("clients.delete", { code: error.code, message: error.message });
     return { ok: false, error: GENERIC_ERROR };
   }
 

@@ -111,6 +111,10 @@ async function insertQuoteItems(
   }));
   const { error } = await supabase.from("quote_items").insert(rows);
   if (error) {
+    console.error("quotes.items.insert", {
+      code: error.code,
+      message: error.message,
+    });
     return { ok: false };
   }
   return { ok: true };
@@ -155,6 +159,12 @@ export async function createQuoteAction(
     .maybeSingle();
 
   if (insertError || !quote) {
+    if (insertError) {
+      console.error("quotes.create", {
+        code: insertError.code,
+        message: insertError.message,
+      });
+    }
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -229,6 +239,10 @@ export async function updateQuoteAction(
     .maybeSingle();
 
   if (updateError) {
+    console.error("quotes.update.client", {
+      code: updateError.code,
+      message: updateError.message,
+    });
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -242,6 +256,10 @@ export async function updateQuoteAction(
     .eq("quote_id", id);
 
   if (deleteItemsError) {
+    console.error("quotes.update.items.delete", {
+      code: deleteItemsError.code,
+      message: deleteItemsError.message,
+    });
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -298,6 +316,7 @@ export async function deleteQuoteAction(
   const { error } = await supabase.from("quotes").delete().eq("id", rawId);
 
   if (error) {
+    console.error("quotes.delete", { code: error.code, message: error.message });
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -362,6 +381,10 @@ export async function changeQuoteStatusAction(
     .maybeSingle();
 
   if (error) {
+    console.error("quotes.update.status", {
+      code: error.code,
+      message: error.message,
+    });
     return { ok: false, error: GENERIC_ERROR };
   }
 

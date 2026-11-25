@@ -115,6 +115,7 @@ export async function listQuotes(): Promise<QuoteListResult> {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("quotes.list", { code: error.code, message: error.message });
     return { ok: false, error: "We could not load your quotes." };
   }
 
@@ -157,6 +158,7 @@ export async function getQuoteById(id: string): Promise<QuoteFetchResult> {
     .maybeSingle();
 
   if (error) {
+    console.error("quotes.getById", { code: error.code, message: error.message });
     return { ok: false, error: "unknown" };
   }
 
@@ -215,6 +217,10 @@ export async function getQuoteStatusContext(id: string): Promise<
     .maybeSingle();
 
   if (error) {
+    console.error("quotes.getStatusContext", {
+      code: error.code,
+      message: error.message,
+    });
     return { ok: false, error: "unknown" };
   }
 

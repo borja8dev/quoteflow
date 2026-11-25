@@ -146,6 +146,36 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
   - Accepted quotes show no edit/delete controls.
 - **Guidelines:** ARCH-02, ARCH-03, ARCH-04, BIZ-01, BIZ-02, BIZ-03, BIZ-04, BIZ-05, UI-01, UI-02, UI-03, UI-05, UI-06.
 
+## 6b. Grant table privileges to `authenticated` and log DB errors (DB-10, ARCH-06)
+
+- [x] Status: done — Iter: 1
+- **Goal:** Fix the live `/clients` and `/quotes/new` failures caused by the Postgres role
+  `authenticated` having no table privileges on `clients`, `quotes` and `quote_items` (RLS
+  only filters rows; a missing `GRANT` yields error `42501` before RLS is even evaluated).
+  Also wire ARCH-06 server-side logging into every data-layer function that maps a Supabase
+  error to a generic message.
+- **Acceptance criteria:**
+  - **DB-01 / DB-09:** a NEW migration file under `supabase/migrations/` with a timestamped
+    name (the initial migration has already been applied; do NOT edit it).
+  - **DB-10:** the new migration contains explicit `grant select, insert, update, delete`
+    statements on `public.clients`, `public.quotes` and `public.quote_items` to the
+    `authenticated` role, and no grants to `anon`. Statements are idempotent-friendly
+    (either preceded by a `revoke all on … from anon` or written so re-running does not
+    fail). The migration file ends with clear "HUMAN ACTION REQUIRED" instructions (same
+    style as `20261125120000_init_schema.sql`) because the Orchestrator will hand the SQL
+    to the human to paste into Supabase.
+  - **ARCH-06 / CODE-04:** every function in `src/features/*/data/*.ts` and `src/features/*/actions.ts`
+    that currently maps a Supabase `error` to a generic user message adds a `console.error`
+    first, including an operation label (e.g. `"clients.list"`) and the error `code` and
+    `message`. Do not log user-submitted payloads. This is the only allowed use of
+    `console.*` in `src/` (CODE-04).
+  - **No regressions:** `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`
+    all pass; `npm audit --omit=dev --audit-level=high` reports 0 vulnerabilities.
+- **Guidelines:** DB-01, DB-09, DB-10, ARCH-04, ARCH-06, CODE-01, CODE-02, CODE-04, CODE-05, SEC-08.
+- **Files/areas:** `supabase/migrations/<new-timestamp>_grant_authenticated.sql`,
+  `src/features/clients/data/clients.ts`, `src/features/clients/actions.ts`,
+  `src/features/quotes/data/quotes.ts`, `src/features/quotes/actions.ts`.
+
 ## 7. Dashboard
 
 - [ ] Status: pending — Iter: —

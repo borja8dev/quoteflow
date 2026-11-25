@@ -32,6 +32,7 @@ export async function listClients(): Promise<ClientListResult> {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("clients.list", { code: error.code, message: error.message });
     return { ok: false, error: "We could not load your clients." };
   }
 
@@ -52,6 +53,7 @@ export async function getClientById(id: string): Promise<ClientFetchResult> {
     .maybeSingle();
 
   if (error) {
+    console.error("clients.getById", { code: error.code, message: error.message });
     return { ok: false, error: "unknown" };
   }
 
