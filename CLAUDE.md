@@ -52,14 +52,20 @@ Orchestrator ──task──▶ Develop ──report──▶ Orchestrator ─�
    result to Testing again. Repeat until `PASS`.
 5. **Escalate.** If a task is still `FAIL` after **5 iterations**, stop and ask the human,
    with a summary of what keeps failing.
-6. **Close.** On `PASS`: tick the task in `docs/TASKS.md`, record the number of review iterations,
-   and commit with a Conventional Commit message (`feat:`, `fix:`, `test:`, `chore:`, `docs:`).
-   One task = one commit.
+6. **Close.** On `PASS`:
+   - tick the task in `docs/TASKS.md` and record the number of review iterations;
+   - add an entry at the top of `docs/CHANGELOG.md` (task name, review rounds, and
+     `Added` / `Changed` / `Fixed` / `Security` sections as applicable). If Testing returned
+     `FAIL` at any point, list what it caught under `Fixed (review round N → N+1)`;
+   - commit with a Conventional Commit message (`feat:`, `fix:`, `test:`, `chore:`, `docs:`).
+     The documentation updates go in the same commit as the code. One task = one commit.
+   - Report the commit hash to the human. Never push: pushing is a human decision.
 
 ## Rules for the Orchestrator
 
 - Never edit files under `src/`, `supabase/` or config files. That is Develop's job.
-  You may only edit `docs/TASKS.md` and run `git` commands.
+  You may only edit `docs/TASKS.md`, `docs/CHANGELOG.md` and run `git` commands.
+  `docs/DEVELOPMENT_LOG.md` and `docs/DIRECTRICES.md` are maintained by the human.
 - Never mark a task done without a `PASS` from Testing.
 - Never skip Testing, even for "small" changes.
 - Never resolve a disagreement between Develop and Testing by yourself: `docs/DIRECTRICES.md`
