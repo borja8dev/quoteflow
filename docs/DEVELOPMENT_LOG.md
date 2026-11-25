@@ -133,6 +133,7 @@ The guidelines are the contract, so they are what gets improved.
 | Demo user (auto-confirmed) | Human | Login tested on the running app. |
 | Route protection | Human + browser check | `/` redirects to `/login` without a session; wrong credentials return a generic error. |
 | Public GitHub repository | Human | History scanned for `.env` files and keys before the first push. |
+| Vercel deploy (Hobby plan) | Human | Only the two public Supabase variables configured; Supabase integration not added. Deployment Protection disabled; production URL checked without a Vercel session: `/` and `/clients` redirect to `/login`, login works in an incognito window. |
 
 ## 5. Lessons learned
 

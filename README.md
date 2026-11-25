@@ -4,6 +4,8 @@
 
 QuoteFlow is a quote manager for small businesses. You keep a list of clients, build quotes with line items (description, quantity, unit price), and move each quote through a status flow (`draft` → `sent` → `accepted` or `rejected`). Totals are computed server-side with VAT at 21 %, and an `accepted` quote is locked: it cannot be edited or deleted.
 
+**Live demo:** https://quoteflow-peach.vercel.app
+
 ## How it was built: three Claude Code agents
 
 QuoteFlow was built entirely by a team of three Claude Code agents defined in this repository.
