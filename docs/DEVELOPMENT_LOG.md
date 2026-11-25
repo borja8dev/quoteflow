@@ -57,7 +57,9 @@ The loop escalates to the human after 5 failed iterations. Steps that touch exte
 | 4 | Auth | `3d10f0c` | 1 | Supabase SSR auth, login/logout, route protection with `proxy.ts`. |
 | 5 | Clients CRUD | `a9b9802` | **2** | First `FAIL` from Testing (see §2.1). |
 | 6 | Quotes CRUD | `d8bc2e6` | **2** | Testing caught VAT recomputed outside the domain (`BIZ-02`, `ARCH-01`). |
-| — | Guidelines v1.3 | — | — | Table grants and error logging (see §3.3). |
+| — | Guidelines v1.3 | `0270ddc` | — | Table grants and error logging (see §3.3). |
+| 6b | Grants and error logging | `2c56303` | 1 | New migration with explicit grants; data layer logs DB errors. Verified live in the browser. |
+| 7 | Dashboard | `049b729` | 1 | Quote count per status and total accepted amount. |
 
 ### 2.1 The review loop in action (task 5)
 

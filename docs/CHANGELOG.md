@@ -5,13 +5,6 @@ entry after every Testing `PASS`, in the same commit as the code (so entries wri
 onwards carry no commit hash; use `git log -- docs/CHANGELOG.md` to find it). Format based on [Keep a Changelog](https://keepachangelog.com/).
 The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT_LOG.md).
 
-## Guidelines v1.3
-
-### Added
-- `DB-10`: migrations grant table privileges to `authenticated` explicitly (none to `anon`).
-- `ARCH-06`: database errors are logged server-side before being mapped to a generic message;
-  `CODE-04` allows `console.error` only for this.
-
 ## Task 7 — Dashboard · review rounds: 1
 
 ### Added
@@ -40,6 +33,13 @@ The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT
   `code` and `message` (ARCH-06). No user-submitted payloads are logged.
 - `eslint.config.mjs` now allows `console.error` (and only `console.error`), matching the
   v1.3 CODE-04 update.
+
+## Guidelines v1.3
+
+### Added
+- `DB-10`: migrations grant table privileges to `authenticated` explicitly (none to `anon`).
+- `ARCH-06`: database errors are logged server-side before being mapped to a generic message;
+  `CODE-04` allows `console.error` only for this.
 
 ## Task 6 — Quotes CRUD · review rounds: 2
 
