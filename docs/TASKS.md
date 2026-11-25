@@ -47,7 +47,7 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
 
 ## 2. Domain: pure quote logic + Spanish tax ID validation
 
-- [ ] Status: pending — Iter: —
+- [x] Status: done — Iter: 1
 - **Goal:** Implement the pure business logic (line totals, subtotal, VAT, total in integer
   cents), the status-transition rule, and Spanish NIF/NIE/CIF validation, with full unit tests.
 - **Acceptance criteria:**
