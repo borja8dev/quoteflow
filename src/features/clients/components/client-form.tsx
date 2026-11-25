@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   type ClientActionResult,
 } from "@/features/clients/actions";
@@ -44,70 +46,39 @@ export function ClientForm({
 
   return (
     <form action={formAction} className="flex w-full flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name" className="text-sm font-medium text-gray-900">
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          autoComplete="organization"
-          required
-          defaultValue={initialValues?.name ?? ""}
-          aria-invalid={nameError ? true : undefined}
-          aria-describedby={nameError ? "name-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-        />
-        {nameError ? (
-          <p id="name-error" className="text-sm text-red-600">
-            {nameError}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        id="name"
+        name="name"
+        type="text"
+        autoComplete="organization"
+        required
+        defaultValue={initialValues?.name ?? ""}
+        label="Name"
+        error={nameError}
+      />
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="taxId" className="text-sm font-medium text-gray-900">
-          Tax ID (NIF / NIE / CIF)
-        </label>
-        <input
-          id="taxId"
-          name="taxId"
-          type="text"
-          autoComplete="off"
-          required
-          defaultValue={initialValues?.taxId ?? ""}
-          aria-invalid={taxIdError ? true : undefined}
-          aria-describedby={taxIdError ? "taxId-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base uppercase text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-        />
-        {taxIdError ? (
-          <p id="taxId-error" className="text-sm text-red-600">
-            {taxIdError}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        id="taxId"
+        name="taxId"
+        type="text"
+        autoComplete="off"
+        required
+        defaultValue={initialValues?.taxId ?? ""}
+        label="Tax ID (NIF / NIE / CIF)"
+        className="uppercase"
+        error={taxIdError}
+      />
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-900">
-          Email <span className="font-normal text-gray-500">(optional)</span>
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          defaultValue={initialValues?.email ?? ""}
-          aria-invalid={emailError ? true : undefined}
-          aria-describedby={emailError ? "email-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-        />
-        {emailError ? (
-          <p id="email-error" className="text-sm text-red-600">
-            {emailError}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        defaultValue={initialValues?.email ?? ""}
+        label="Email"
+        labelSuffix="(optional)"
+        error={emailError}
+      />
 
       {generalError ? (
         <p role="alert" className="text-sm text-red-600">
@@ -116,19 +87,14 @@ export function ClientForm({
       ) : null}
 
       <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link
-          href="/clients"
-          className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition-colors hover:bg-gray-50"
-        >
-          Cancel
+        <Link href="/clients">
+          <Button type="button" variant="secondary">
+            Cancel
+          </Button>
         </Link>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+        <Button type="submit" variant="primary" disabled={isPending}>
           {isPending ? pendingLabel : submitLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );

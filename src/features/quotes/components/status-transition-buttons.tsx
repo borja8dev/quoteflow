@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { Button, type ButtonVariant } from "@/components/ui/button";
 import {
   changeQuoteStatusAction,
   type QuoteActionResult,
@@ -18,18 +19,7 @@ type TransitionOption = {
   label: string;
   pendingLabel: string;
   nextStatus: QuoteStatus;
-  tone: "primary" | "success" | "danger" | "neutral";
-};
-
-const CLASSES_BY_TONE: Record<TransitionOption["tone"], string> = {
-  primary:
-    "bg-gray-900 text-white border-transparent hover:bg-gray-800 disabled:opacity-60",
-  success:
-    "bg-emerald-600 text-white border-transparent hover:bg-emerald-700 disabled:opacity-60",
-  danger:
-    "border-red-200 bg-white text-red-700 hover:bg-red-50 disabled:opacity-60",
-  neutral:
-    "border-gray-300 bg-white text-gray-900 hover:bg-gray-50 disabled:opacity-60",
+  variant: ButtonVariant;
 };
 
 function optionsFor(status: QuoteStatus): ReadonlyArray<TransitionOption> {
@@ -39,7 +29,7 @@ function optionsFor(status: QuoteStatus): ReadonlyArray<TransitionOption> {
         label: "Send",
         pendingLabel: "Sending…",
         nextStatus: "sent",
-        tone: "primary",
+        variant: "primary",
       },
     ];
   }
@@ -49,19 +39,19 @@ function optionsFor(status: QuoteStatus): ReadonlyArray<TransitionOption> {
         label: "Mark accepted",
         pendingLabel: "Saving…",
         nextStatus: "accepted",
-        tone: "success",
+        variant: "primary",
       },
       {
         label: "Mark rejected",
         pendingLabel: "Saving…",
         nextStatus: "rejected",
-        tone: "danger",
+        variant: "destructive",
       },
       {
         label: "Return to draft",
         pendingLabel: "Saving…",
         nextStatus: "draft",
-        tone: "neutral",
+        variant: "secondary",
       },
     ];
   }
@@ -92,14 +82,15 @@ function TransitionButton({
   return (
     <form action={formAction} className="flex flex-col items-start gap-1">
       <input type="hidden" name="nextStatus" value={option.nextStatus} />
-      <button
+      <Button
         type="submit"
+        variant={option.variant}
+        size="sm"
         disabled={disabled || isPending}
         title={disabled ? disabledReason : undefined}
-        className={`inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-sm font-medium shadow-sm transition-colors disabled:cursor-not-allowed ${CLASSES_BY_TONE[option.tone]}`}
       >
         {isPending ? option.pendingLabel : option.label}
-      </button>
+      </Button>
       {errorMessage ? (
         <p role="alert" className="text-sm text-red-600">
           {errorMessage}

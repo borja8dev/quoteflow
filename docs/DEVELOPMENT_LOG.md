@@ -62,6 +62,7 @@ The loop escalates to the human after 5 failed iterations. Steps that touch exte
 | 7 | Dashboard | `049b729` | 1 | Quote count per status and total accepted amount. |
 | 7b | Dashboard aggregation in the domain | `6024162` | 1 | Human review: aggregation lived in the data layer without tests (`ARCH-01`). Moved to a pure function with 6 tests. |
 | 8 | Deploy readiness | `7b13aff` | 1 | README with setup, migrations, Vercel deploy and demo user. |
+| — | Guidelines v1.4 | — | — | Visual design rules (see §3.4). |
 
 ### 2.1 The review loop in action (task 5)
 
@@ -77,7 +78,7 @@ both rounds: this was caught by the guideline review, not by the toolchain.
 
 ## 3. Guideline evolution (human review)
 
-Testing approves strictly against the guidelines. Three times, human review found a real problem
+Testing approves strictly against the guidelines. Four times, human review found a real problem
 that Testing approved **because no rule covered it**. In both cases the fix was the same:
 add the missing rule, update the agents, then send a corrective task through the normal loop.
 The guidelines are the contract, so they are what gets improved.
@@ -122,6 +123,19 @@ The guidelines are the contract, so they are what gets improved.
 - **Rules added:** `DB-10` (explicit grants to `authenticated`, none to `anon`) and `ARCH-06`
   (log database errors server-side before mapping them); `CODE-04` updated accordingly.
 - **Result:** corrective task 6b (new migration with grants, error logging in the data layer).
+
+### 3.4 v1.4 — Visual design (after deploy)
+
+- **Finding:** the deployed app was functionally complete and every check was green, but it
+  looked unfinished: no shared navigation, no shared components, plain lists, and no visual
+  difference between quote statuses.
+- **Why:** the UI rules (`UI-01..06`) only covered accessibility, states and formatting.
+  Nothing asked for a consistent design, so Develop never built one and Testing never
+  checked one.
+- **Rules added:** `UI-07..14` (app shell, shared components in `src/components/ui/`, one
+  visual language, status badges, responsive tables, dashboard stat cards, focus states,
+  login layout).
+- **Result:** task 9 (UI polish) through the normal loop.
 
 ## 4. Human-in-the-loop steps
 

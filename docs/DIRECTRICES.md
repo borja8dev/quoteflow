@@ -110,6 +110,24 @@ nobody reinterprets it alone.
 - **UI-04** Layouts work at 375px width (mobile) without horizontal scroll.
 - **UI-05** Amounts are displayed in euros with Spanish formatting (e.g. `1.234,56 €`).
 - **UI-06** Locked (accepted) quotes show no edit or delete controls.
+- **UI-07** App shell: every authenticated page shares one layout with a top navigation bar
+  (product name, Dashboard, Clients, Quotes, the signed-in user's email and Sign out). The
+  current section is highlighted. On mobile the navigation stays usable without horizontal scroll.
+- **UI-08** Shared presentational components live in `src/components/ui/` (at least `Button`,
+  `Card`, `Badge`, `Input`, `PageHeader`, `EmptyState`) and every feature uses them. The same
+  element is never styled with duplicated class strings in different files.
+- **UI-09** One visual language: a single accent colour (indigo) on a neutral slate scale; page
+  background `slate-50`; content inside white cards with a border, `rounded-lg` and a subtle
+  shadow; one consistent spacing scale. No inline styles; Tailwind classes only.
+- **UI-10** Quote status is always shown as a coloured badge with the same mapping everywhere
+  (lists, detail, dashboard): draft = gray, sent = blue, accepted = green, rejected = red.
+- **UI-11** Data lists render as a table from the `md` breakpoint up and as stacked cards on
+  mobile. Amounts are right-aligned with tabular numbers.
+- **UI-12** The dashboard shows one stat card per status (label, large number, status colour
+  accent) and a prominent card for the total accepted amount.
+- **UI-13** Every interactive element has hover and visible `focus-visible` states. Destructive
+  actions use red styling and ask for confirmation.
+- **UI-14** The login page is a centred card with the product name and a one-line description.
 
 ## DOC — Documentation
 

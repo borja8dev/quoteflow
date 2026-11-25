@@ -236,3 +236,71 @@ Legend: `[ ]` pending · `[x]` done. `Iter:` records how many develop → testin
   - `README.md` explains the app, local setup, env vars, how to run migrations,
     Vercel deploy steps, and the demo user seed.
 - **Guidelines:** CODE-05, DOC-01, DOC-02.
+
+## 9. UI polish (apply UI-07..UI-14)
+
+- [x] Status: done — Iter: 2
+- **Goal:** Apply the v1.4 UI guidelines (UI-07..UI-14) across every page — login,
+  dashboard, clients, quotes — without changing behaviour, data access or business
+  rules. The user-visible outcome is a coherent visual language; the behavioural
+  outcome is zero regressions.
+- **Acceptance criteria:**
+  - **UI-07 (app shell):** every authenticated page uses one shared layout with a top
+    nav bar containing the product name, links to Dashboard / Clients / Quotes, the
+    signed-in user's email and a Sign out control. The current section is visually
+    highlighted (aria-current + a visual style). Nav is usable at 375px (no horizontal
+    scroll; hamburger / collapse acceptable). The login page is NOT wrapped by this
+    shell (see UI-14).
+  - **UI-08 (shared components):** create at minimum `Button`, `Card`, `Badge`,
+    `Input`, `PageHeader`, `EmptyState` under `src/components/ui/`. Every page /
+    feature uses them; the same element is never styled with duplicated class strings
+    across files. Delete redundant inline styling that these components replace.
+  - **UI-09 (visual language):** indigo accent on a neutral slate scale; page
+    background `slate-50`; content inside white cards with a border, `rounded-lg`, and
+    a subtle shadow; one consistent spacing scale. Tailwind classes only — no `style`
+    props, no CSS files beyond `globals.css`.
+  - **UI-10 (status badge):** one component / helper that maps `QuoteStatus → colour`
+    (draft = gray, sent = blue, accepted = green, rejected = red). It is used on the
+    quote list, quote detail and the dashboard — no ad-hoc "badge" markup anywhere else.
+  - **UI-11 (responsive lists):** clients list and quotes list render as a table at
+    `md:` and up, stacked cards on mobile. Monetary amounts are right-aligned and use
+    `tabular-nums` so columns line up.
+  - **UI-12 (dashboard):** one stat card per status (label, large number, status
+    colour accent) plus a prominent card for the total accepted amount. The per-status
+    cards use the same colour mapping as UI-10.
+  - **UI-13 (states + confirmation):** every interactive element has a visible
+    `focus-visible` ring and a hover state. Destructive actions (Delete client, Delete
+    quote) use red styling and show a confirmation prompt before firing the Server
+    Action. The confirmation must be synchronous for the user (a `window.confirm` is
+    acceptable; a nicer inline confirm is also acceptable). If `window.confirm` is
+    used, it must be guarded appropriately for SSR (client component only).
+  - **UI-14 (login):** `/login` renders a centred card with the product name
+    ("QuoteFlow") and a one-line description. Logged-out users land here; it must NOT
+    be wrapped by the authenticated app shell (UI-07).
+  - **No behaviour change:** Server Actions, data queries, domain logic and route
+    structure are untouched. Form fields, labels, validation, redirects and status
+    transitions keep working exactly as before.
+  - **Tests:** every existing test keeps passing. Only add tests where genuinely new
+    logic appears — the obvious candidate is a pure `statusBadgeClasses(status)` (or
+    equivalent) mapper in `src/components/ui/badge.*` or a small helper in a `domain/`
+    module; a quick unit test on the colour map is enough. Do NOT add tests for pure
+    styling; UI-08..UI-13 are structural, not behavioural.
+  - `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` all pass;
+    `npm audit --omit=dev --audit-level=high` reports 0 vulnerabilities.
+- **Guidelines:** UI-01..UI-14 (UI-07..UI-14 are new; UI-01..UI-06 must still hold),
+  ARCH-01, ARCH-02, ARCH-05, CODE-01..06, SEC-08. Behavioural guidelines (SEC-06,
+  SEC-07, ARCH-03, ARCH-04, ARCH-06, BIZ-*) must not regress.
+- **Files/areas:**
+  - New: `src/components/ui/` (`button.tsx`, `card.tsx`, `badge.tsx`, `input.tsx`,
+    `page-header.tsx`, `empty-state.tsx`, plus a short `index.ts` or direct imports —
+    pick one and stick to it).
+  - New: `src/app/(app)/layout.tsx` or similar for the authenticated app shell. The
+    exact approach (route group, nested layout, conditional in root layout) is a
+    judgement call — pick the one that keeps `/login` out of the shell cleanly.
+  - Touched: every `src/app/**/page.tsx`, `src/app/**/loading.tsx`, `src/app/**/error.tsx`,
+    and the feature components under `src/features/*/components/`, to adopt the shared
+    primitives. Markup only — no touching `src/features/*/actions.ts`,
+    `src/features/*/data/*.ts` or any `src/features/*/domain/*.ts` module (behaviour
+    stays frozen).
+  - Not touched: `supabase/migrations/**`, `CLAUDE.md`, `docs/DIRECTRICES.md`,
+    `docs/DEVELOPMENT_LOG.md`.

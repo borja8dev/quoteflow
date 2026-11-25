@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   loginAction,
   type LoginActionResult,
@@ -22,50 +24,25 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="flex w-full flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-900">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          aria-invalid={emailError ? true : undefined}
-          aria-describedby={emailError ? "email-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-        />
-        {emailError ? (
-          <p id="email-error" className="text-sm text-red-600">
-            {emailError}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        required
+        label="Email"
+        error={emailError}
+      />
 
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="password"
-          className="text-sm font-medium text-gray-900"
-        >
-          Password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          aria-invalid={passwordError ? true : undefined}
-          aria-describedby={passwordError ? "password-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-        />
-        {passwordError ? (
-          <p id="password-error" className="text-sm text-red-600">
-            {passwordError}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        id="password"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        required
+        label="Password"
+        error={passwordError}
+      />
 
       {generalError ? (
         <p role="alert" className="text-sm text-red-600">
@@ -73,13 +50,14 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        className="mt-2 w-full"
         disabled={isPending}
-        className="mt-2 inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
     </form>
   );
 }

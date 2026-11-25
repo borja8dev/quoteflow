@@ -5,6 +5,38 @@ entry after every Testing `PASS`, in the same commit as the code (so entries wri
 onwards carry no commit hash; use `git log -- docs/CHANGELOG.md` to find it). Format based on [Keep a Changelog](https://keepachangelog.com/).
 The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT_LOG.md).
 
+## Task 9 — UI polish (UI-07..UI-14) · review rounds: 2
+
+### Added
+- `src/components/ui/` with shared primitives `Button`, `Card`, `Badge` (+ pure
+  `statusBadgeTone` mapper with unit tests), `Input`, `PageHeader`, `EmptyState`,
+  `Alert` and `BackLink`. A tiny local `cn` helper, no new dependency (UI-08).
+- Authenticated app shell at `src/app/(app)/layout.tsx` with a top nav (product name,
+  Dashboard / Clients / Quotes, signed-in user's email, Sign out). The current section
+  gets `aria-current="page"` plus an indigo pill. Nav is a compact two-row layout at
+  375px, single row from `sm:` up (UI-07).
+
+### Changed
+- Every authenticated route moved into the `(app)` route group — URLs unchanged.
+- Pages, forms and feature components rewritten to use the shared primitives. Indigo
+  accent on a neutral slate scale; `bg-slate-50` page background; white cards with
+  border, `rounded-lg` and a subtle shadow (UI-09).
+- Clients and quotes lists: stacked cards on mobile, `<table>` from `md:` up, amounts
+  right-aligned with `tabular-nums` (UI-11).
+- Dashboard: four per-status cards (with the shared status→tone colour mapping) plus
+  a prominent "Total accepted" card (UI-12).
+- Login is a centred card with the product name and a one-line description, outside
+  the authenticated shell (UI-14).
+- Destructive actions (Delete client, Delete quote) use red styling and ask for
+  confirmation via `window.confirm` on submit (UI-13).
+
+### Fixed (review round 1 → 2)
+- Inline error-alert class string (`rounded-lg border border-red-200 bg-red-50 …`)
+  was duplicated across 11 sites, and the "Back to …" link class string across 12
+  sites, violating UI-08 ("the same element is never styled with duplicated class
+  strings in different files"). Extracted shared `Alert` and `BackLink` primitives
+  under `src/components/ui/` and replaced every occurrence.
+
 ## Task 8 — Deploy readiness · review rounds: 1
 
 ### Added
@@ -13,6 +45,12 @@ The reasons behind guideline changes are in [`DEVELOPMENT_LOG.md`](./DEVELOPMENT
   (plus an optional SQL snippet that looks the demo user up in `auth.users` by email),
   npm scripts, project layout and pointers to the contributor docs (DOC-01).
 - Production build (`npm run build`) verified green (CODE-05).
+
+## Guidelines v1.4
+
+### Added
+- `UI-07` to `UI-14`: app shell with navigation, shared UI components, one visual language,
+  status badges, responsive tables, dashboard stat cards, focus states and login layout.
 
 ## Task 7b — Dashboard aggregation in the domain · review rounds: 1
 

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { formatCentsAsEuros } from "@/features/quotes/domain/format";
 import {
   QuoteTotalsError,
@@ -86,6 +89,9 @@ function itemErrorsFor(
   }
   return state.fieldErrors.items[index];
 }
+
+const SELECT_CLASSES =
+  "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 shadow-sm focus-visible:border-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
 
 export function QuoteForm({
   action,
@@ -173,7 +179,7 @@ export function QuoteForm({
       <input type="hidden" name="itemCount" value={items.length} />
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="clientId" className="text-sm font-medium text-gray-900">
+        <label htmlFor="clientId" className="text-sm font-medium text-slate-900">
           Client
         </label>
         <select
@@ -183,7 +189,7 @@ export function QuoteForm({
           defaultValue={initialValues?.clientId ?? ""}
           aria-invalid={clientError ? true : undefined}
           aria-describedby={clientError ? "clientId-error" : undefined}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className={SELECT_CLASSES}
         >
           <option value="" disabled>
             Select a client
@@ -203,14 +209,15 @@ export function QuoteForm({
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Line items</h2>
-          <button
+          <h2 className="text-base font-semibold text-slate-900">Line items</h2>
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={addItem}
-            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 shadow-sm transition-colors hover:bg-gray-50"
           >
             Add item
-          </button>
+          </Button>
         </div>
 
         <ul className="flex flex-col gap-4">
@@ -221,33 +228,25 @@ export function QuoteForm({
             const unitPriceId = `${item.key}-unitPrice`;
 
             return (
-              <li
-                key={item.key}
-                className="flex flex-col gap-3 rounded-md border border-gray-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-700">
-                    Item {index + 1}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    disabled={items.length === 1}
-                    aria-label={`Remove item ${index + 1}`}
-                    className="inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Remove
-                  </button>
-                </div>
+              <li key={item.key}>
+                <Card className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-slate-700">
+                      Item {index + 1}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeItem(index)}
+                      disabled={items.length === 1}
+                      aria-label={`Remove item ${index + 1}`}
+                    >
+                      Remove
+                    </Button>
+                  </div>
 
-                <div className="flex flex-col gap-1">
-                  <label
-                    htmlFor={descriptionId}
-                    className="text-sm font-medium text-gray-900"
-                  >
-                    Description
-                  </label>
-                  <input
+                  <Input
                     id={descriptionId}
                     name={`items[${index}].description`}
                     type="text"
@@ -256,31 +255,12 @@ export function QuoteForm({
                     onChange={(event) =>
                       updateItem(index, "description", event.target.value)
                     }
-                    aria-invalid={errors?.description ? true : undefined}
-                    aria-describedby={
-                      errors?.description ? `${descriptionId}-error` : undefined
-                    }
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    label="Description"
+                    error={errors?.description}
                   />
-                  {errors?.description ? (
-                    <p
-                      id={`${descriptionId}-error`}
-                      className="text-sm text-red-600"
-                    >
-                      {errors.description}
-                    </p>
-                  ) : null}
-                </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1">
-                    <label
-                      htmlFor={quantityId}
-                      className="text-sm font-medium text-gray-900"
-                    >
-                      Quantity
-                    </label>
-                    <input
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Input
                       id={quantityId}
                       name={`items[${index}].quantity`}
                       type="text"
@@ -290,30 +270,11 @@ export function QuoteForm({
                       onChange={(event) =>
                         updateItem(index, "quantity", event.target.value)
                       }
-                      aria-invalid={errors?.quantity ? true : undefined}
-                      aria-describedby={
-                        errors?.quantity ? `${quantityId}-error` : undefined
-                      }
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      label="Quantity"
+                      error={errors?.quantity}
                     />
-                    {errors?.quantity ? (
-                      <p
-                        id={`${quantityId}-error`}
-                        className="text-sm text-red-600"
-                      >
-                        {errors.quantity}
-                      </p>
-                    ) : null}
-                  </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label
-                      htmlFor={unitPriceId}
-                      className="text-sm font-medium text-gray-900"
-                    >
-                      Unit price (€)
-                    </label>
-                    <input
+                    <Input
                       id={unitPriceId}
                       name={`items[${index}].unitPrice`}
                       type="text"
@@ -323,51 +284,40 @@ export function QuoteForm({
                       onChange={(event) =>
                         updateItem(index, "unitPrice", event.target.value)
                       }
-                      aria-invalid={errors?.unitPrice ? true : undefined}
-                      aria-describedby={
-                        errors?.unitPrice ? `${unitPriceId}-error` : undefined
-                      }
-                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      label="Unit price (€)"
+                      error={errors?.unitPrice}
                     />
-                    {errors?.unitPrice ? (
-                      <p
-                        id={`${unitPriceId}-error`}
-                        className="text-sm text-red-600"
-                      >
-                        {errors.unitPrice}
-                      </p>
-                    ) : null}
                   </div>
-                </div>
+                </Card>
               </li>
             );
           })}
         </ul>
       </section>
 
-      <section
+      <Card
         aria-label="Quote totals"
-        className="flex flex-col gap-1 rounded-md border border-gray-200 bg-gray-50 p-4 text-sm"
+        className="flex flex-col gap-1 bg-slate-50 text-sm"
       >
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span className="font-medium text-gray-900">
+          <span className="text-slate-600">Subtotal</span>
+          <span className="font-medium tabular-nums text-slate-900">
             {formatCentsAsEuros(totals.subtotalCents)}
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">VAT (21%)</span>
-          <span className="font-medium text-gray-900">
+          <span className="text-slate-600">VAT (21%)</span>
+          <span className="font-medium tabular-nums text-slate-900">
             {formatCentsAsEuros(totals.vatCents)}
           </span>
         </div>
-        <div className="mt-1 flex items-center justify-between border-t border-gray-200 pt-2">
-          <span className="font-semibold text-gray-900">Total</span>
-          <span className="text-base font-semibold text-gray-900">
+        <div className="mt-1 flex items-center justify-between border-t border-slate-200 pt-2">
+          <span className="font-semibold text-slate-900">Total</span>
+          <span className="text-base font-semibold tabular-nums text-slate-900">
             {formatCentsAsEuros(totals.totalCents)}
           </span>
         </div>
-      </section>
+      </Card>
 
       {generalError ? (
         <p role="alert" className="text-sm text-red-600">
@@ -376,19 +326,18 @@ export function QuoteForm({
       ) : null}
 
       <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link
-          href={cancelHref}
-          className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition-colors hover:bg-gray-50"
-        >
-          Cancel
+        <Link href={cancelHref}>
+          <Button type="button" variant="secondary">
+            Cancel
+          </Button>
         </Link>
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={isPending || clients.length === 0}
-          className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? pendingLabel : submitLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );
